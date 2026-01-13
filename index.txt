@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To the Power of Math!</title>
+
+    <style>
+        body {
+            background-color: #222629;
+            font-family: system-ui;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #FFFFFF;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        label {
+            color: #86C232;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        input {
+            color: #222629;
+            font-size: 20px;
+            margin-bottom: 15px;
+            width: 150px;
+            padding: 6px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #86C232;
+            border: none;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #729F2F;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 22px;
+            color: #FFFFFF;
+        }
+    </style>
+
+    <script>
+        function callAPI() {
+            const base = Number(document.getElementById("base").value);
+            const exponent = Number(document.getElementById("exponent").value);
+
+            if (isNaN(base) || isNaN(exponent)) {
+                alert("Please enter valid numbers");
+                return;
+            }
+
+            fetch("https://hxymtt1zvj.execute-api.us-west-1.amazonaws.com/dev1", {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    base: base,
+                    exponent: exponent
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = data.body;
+            })
+            .catch(error => {
+                console.error(error);
+                alert("Error calling API");
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>TO THE POWER OF MATH!</h1>
+
+    <form onsubmit="event.preventDefault(); callAPI();">
+        <label for="base">Base number:</label>
+        <input type="number" id="base" placeholder="Enter base" required>
+
+        <label for="exponent">…to the power of:</label>
+        <input type="number" id="exponent" placeholder="Enter exponent" required>
+
+        <button type="submit">CALCULATE</button>
+    </form>
+
+    <div id="result"></div>
+</body>
+</html>
+

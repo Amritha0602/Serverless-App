@@ -1,0 +1,58 @@
+import json
+import math
+import boto3
+import uuid
+from time import gmtime, strftime
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('power-of-math-table')
+
+def lambda_handler(event, context):
+    now = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+
+    # Parse body if coming from API Gateway
+    if 'body' in event:
+        try:
+            body = json.loads(event['body'])
+        except json.JSONDecodeError:
+            return {
+                'statusCode': 400,
+                'body': json.dumps('Invalid JSON body')
+            }
+    else:
+        body = event
+
+    # Extract inputs
+    try:
+        base = int(body.get('base', 0))
+        exponent = int(body.get('exponent', 0))
+    except (ValueError, TypeError):
+        return {
+            'statusCode': 400,
+            'body': json.dumps('Invalid input: base and exponent must be integers.')
+        }
+
+    # Optional safety limit
+    if exponent > 100:
+        return {
+            'statusCode': 400,
+            'body': json.dumps('Exponent too large')
+        }
+
+    math_result = base ** exponent
+
+    # Store in DynamoDB
+    table.put_item(
+        Item={
+            'id': str(uuid.uuid4()),
+            'LatestGreetingTime': now,
+            'result': str(math_result),
+            'base': str(base),
+            'exponent': str(exponent)
+        }
+    )
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps(f'Your result is {math_result}')
+    }
